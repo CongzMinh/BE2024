@@ -1,24 +1,16 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { UserRepository } from './repositories/user.repository';
-import { httpErrors } from 'src/shared/helper/exceptions';
-import { Role } from 'src/shared/enums/user.enum';
-import { LoginWithWalletDto } from '../auth/dto/login-wallet.dto';
 
 @Injectable()
 export class UserService {
   constructor(private userRepo: UserRepository) {}
 
-  async create(createUserDto: LoginWithWalletDto) {
-    return this.userRepo.save({
-      name: 'random name',
-      email: 'randomemail@gmail.com',
-      phonenumber: '0398992312',
-      address: createUserDto.address,
-      role: Role.USER,
-    });
+  async create(createUserDto: CreateUserDto) {
+    const createdUser = await this.userRepo.create(createUserDto);
+    return this.userRepo.save(createdUser);
   }
 
   findAll() {
@@ -33,6 +25,14 @@ export class UserService {
     return this.userRepo.findOne({
       where: {
         email,
+      },
+    });
+  }
+
+  async findByPhoneNumber(phoneNumber: string): Promise<UserEntity> {
+    return this.userRepo.findOne({
+      where: {
+        phoneNumber,
       },
     });
   }
