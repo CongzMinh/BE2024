@@ -1,6 +1,6 @@
 import { IsNotEmpty, Length } from 'class-validator';
 
-export class CreatePostDto {
+export class UpdatePostDto {
   @IsNotEmpty()
   address: string;
 

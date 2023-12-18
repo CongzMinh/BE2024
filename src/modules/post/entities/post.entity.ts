@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -30,7 +30,7 @@ export class PostEntity {
   name: string;
 
   @Column()
-  price: string;
+  price: number;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -51,5 +51,6 @@ export class PostEntity {
   deletedAt?: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.posts)
+  @Transform(({ obj }) => obj.user.id)
   user: UserEntity;
 }
