@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/shared/enums/user.enum';
-import { PostEntity } from 'src/modules/post/entities/post.entity';
+
 
 @Entity({
   name: 'users',
