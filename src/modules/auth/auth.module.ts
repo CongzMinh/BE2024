@@ -8,6 +8,9 @@ import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { CacheModule } from '@nestjs/cache-manager';
 import { jwtConfig } from 'src/configs/jwt.config';
+import { OtpRepository } from './repositories/otp.respository';
+import { UserRepository } from '../user/repositories/user.repository';
+
 
 @Module({
   imports: [
@@ -16,7 +19,13 @@ import { jwtConfig } from 'src/configs/jwt.config';
     UserModule,
     PassportModule,
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    OtpRepository,
+    UserRepository,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

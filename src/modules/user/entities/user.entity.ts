@@ -5,14 +5,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/shared/enums/user.enum';
+import { PostEntity } from 'src/modules/post/entities/post.entity';
 
 @Entity({
   name: 'users',
@@ -27,15 +26,16 @@ export class UserEntity {
   @Expose()
   name?: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   email: string;
 
   @Column({
     length: 200,
+    nullable: true,
   })
   @Expose()
-  phonenumber?: string;
+  phoneNumber?: string;
 
   @Column({
     nullable: true,

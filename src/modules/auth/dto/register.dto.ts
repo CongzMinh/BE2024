@@ -4,10 +4,9 @@ import {
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
-  Length,
 } from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterDto {
   @IsNotEmpty()
   name: string;
 
