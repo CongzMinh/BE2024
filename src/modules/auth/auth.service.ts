@@ -78,12 +78,12 @@ export class AuthService {
     }
 
     //check phonenumber axist
-    const userByPhoneNumber = await this.userService.findByPhoneNumber(
-      registerDto.phoneNumber,
-    );
-    if (userByPhoneNumber) {
-      throw new BadRequestException('Phone number ready axist!');
-    }
+    // const userByPhoneNumber = await this.userService.findByPhoneNumber(
+    //   registerDto.phoneNumber,
+    // );
+    // if (userByPhoneNumber) {
+    //   throw new BadRequestException('Phone number ready axist!');
+    // }
 
     //save to db
     const savedUser = await this.userService.create(registerDto);
