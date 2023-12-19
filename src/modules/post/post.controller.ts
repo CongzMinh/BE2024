@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -43,7 +44,7 @@ export class PostController {
     return this.postService.getOneById(id, currentUser);
   }
 
-  @Post(':id')
+  @Put(':id')
   update(
     @Param('id') id: number,
     @CurrentUser() currentUser: UserEntity,

@@ -8,15 +8,12 @@ import {
   Get,
   Request,
   Param,
-  Query,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ResponseDto } from 'src/shared/dtos/response.dto';
-import { ResponseLogin } from './dto/respone-login.dto';
-import { LoginWithWalletDto } from './dto/login-wallet.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @ApiTags('Auth')
@@ -46,7 +43,7 @@ export class AuthController {
     return this.authService.sendEmailOtp(email);
   }
 
-  @Post('reset-password/:email/:otp')
+  @Put('reset-password/:email/:otp')
   resetPassword(
     @Param('email') email: string,
     @Param('otp') otp: string,
