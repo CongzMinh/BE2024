@@ -14,6 +14,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerExampleModule } from './modules/throttler/throttler.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { RoomModule } from './modules/room/room.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         },
       }),
     }),
+    RoomModule,
   ],
   controllers: [],
   providers: [],
