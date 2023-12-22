@@ -32,6 +32,12 @@ export class PostEntity {
   @Column()
   price: number;
 
+  @Column()
+  area: number;
+
+  @Column()
+  extension: string;
+
   @CreateDateColumn({
     name: 'created_at',
   })

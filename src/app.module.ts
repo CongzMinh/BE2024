@@ -14,8 +14,6 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerExampleModule } from './modules/throttler/throttler.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { ZoomModule } from './modules/zoom/zoom.module';
-
 import { RoomModule } from './modules/room/room.module';
 
 
@@ -56,13 +54,10 @@ import { RoomModule } from './modules/room/room.module';
         },
       }),
     }),
-<<<<<<< HEAD
+
     RoomModule,
  ],
-=======
-    ZoomModule,
-  ],
->>>>>>> 3c60e556971fa2a5ee3e848f81927863fb8b622f
+
   controllers: [],
   providers: [],
 })

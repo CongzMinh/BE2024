@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Put, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { RoomFilterDto } from './dto/room-filter.dto';
 
@@ -16,7 +16,7 @@ export class RoomController {
     return this.roomService.getDetail(id);
   }
 
-  @Put('search')
+  @Post('search')
   getAllWithFilter(@Query() request: RoomFilterDto) {
     return this.roomService.getAllWithFilter(request);
   }
