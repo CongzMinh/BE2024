@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -7,6 +8,8 @@ import {
   Param,
   Post,
   Put,
+  Request,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,6 +20,9 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../user/decorators/currentUser.decorator';
 import { UserEntity } from '../user/entities/user.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { storageConfig } from 'src/configs/multer.config';
+import { extname } from 'path';
 
 @Controller('post')
 @ApiTags('Posts')
@@ -27,11 +33,40 @@ export class PostController {
   constructor(private postService: PostService) {}
 
   @Post('create')
+  @UseInterceptors(
+    FilesInterceptor('image', 10, {
+      storage: storageConfig('image'),
+      fileFilter: (req, file, cb) => {
+        const ext = extname(file.originalname);
+        const allowedExtArr = ['.jpg', '.png', '.jpeg'];
+        if (!allowedExtArr.includes(ext)) {
+          req.fileValidationError = `Wrong extension type. Accepted file extensions are: ${allowedExtArr}`;
+          cb(null, false);
+        } else {
+          const fileSize = parseInt(req.headers['content-length']);
+          if (fileSize > 1024 * 1024 * 5) {
+            req.fileValidationError = 'File size is too large';
+            cb(null, false);
+          } else {
+            cb(null, true);
+          }
+        }
+      },
+    }),
+  )
   createPost(
+    @Request() req: any,
     @Body() createPostDto: CreatePostDto,
+    @UploadedFiles() file: Express.Multer.File[],
     @CurrentUser() currentUser: UserEntity,
   ) {
-    return this.postService.create(createPostDto, currentUser);
+    if (req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError);
+    }
+    const filepaths = file.map(
+      (file) => file.destination + '/' + file.filename,
+    );
+    return this.postService.createPost(createPostDto, filepaths, currentUser);
   }
 
   @Get()
@@ -45,12 +80,46 @@ export class PostController {
   }
 
   @Put(':id')
+  @UseInterceptors(
+    FilesInterceptor('image', 10, {
+      storage: storageConfig('image'),
+      fileFilter: (req, file, cb) => {
+        const ext = extname(file.originalname);
+        const allowedExtArr = ['.jpg', '.png', '.jpeg'];
+        if (!allowedExtArr.includes(ext)) {
+          req.fileValidationError = `Wrong extension type. Accepted file extensions are: ${allowedExtArr}`;
+          cb(null, false);
+        } else {
+          const fileSize = parseInt(req.headers['content-length']);
+          if (fileSize > 1024 * 1024 * 5) {
+            req.fileValidationError = 'File size is too large';
+            cb(null, false);
+          } else {
+            cb(null, true);
+          }
+        }
+      },
+    }),
+  )
   update(
+    @Request() req: any,
     @Param('id') id: number,
     @CurrentUser() currentUser: UserEntity,
     @Body() updatePostDto: UpdatePostDto,
+    @UploadedFiles() file: Express.Multer.File[],
   ) {
-    return this.postService.updateById(id, currentUser, updatePostDto);
+    if (req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError);
+    }
+    const filepaths = file.map(
+      (file) => file.destination + '/' + file.filename,
+    );
+    return this.postService.updateById(
+      id,
+      currentUser,
+      updatePostDto,
+      filepaths,
+    );
   }
 
   @Delete(':id')

@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -29,8 +29,9 @@ export class AuthController {
   }
 
   @Post('register')
-  signUp(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  signUp(@Body() request: CreateUserDto) {
+    console.log('==============' + request.email + request.phoneNumber);
+    return this.authService.register(request);
   }
 
   @Post('email/forgot-password/:email')

@@ -2,12 +2,15 @@ import {
   Controller,
   Get,
   Body,
-  Patch,
+  Request,
   Param,
   Delete,
   UseGuards,
   ParseIntPipe,
   Put,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,6 +23,9 @@ import { RolesGuard } from '../auth/roles.guard';
 import { CurrentUser } from './decorators/currentUser.decorator';
 import { UserEntity } from './entities/user.entity';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { storageConfig } from 'src/configs/multer.config';
+import { extname } from 'path';
 
 @Controller('user')
 @ApiTags('Users')
@@ -42,13 +48,45 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: storageConfig('avatar'),
+      fileFilter: (req, file, cb) => {
+        const ext = extname(file.originalname);
+        const allowedExtArr = ['.jpg', '.png', '.jpeg'];
+        if (!allowedExtArr.includes(ext)) {
+          req.fileValidationError = `Wrong extention type. Accepted file ext are: ${allowedExtArr}`;
+          cb(null, false);
+        } else {
+          const fileSize = parseInt(req.headers['content-length']);
+          if (fileSize > 1024 * 1024 * 5) {
+            req.fileValidationError = 'File size is too large';
+            cb(null, false);
+          } else {
+            cb(null, true);
+          }
+        }
+      },
+    }),
+  )
+
   @Put('update/:id')
   updateUser(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: UserEntity,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.updateUser(id, updateUserDto, currentUser);
+    if (req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError);
+    }
+    return this.userService.updateUser(
+      id,
+      updateUserDto,
+      file.destination + '/' + file.filename,
+      currentUser,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -59,6 +97,15 @@ export class UserController {
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     return this.userService.updatePassword(id, updatePasswordDto, currentUser);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('avatar/:id')
+  deleteAvatar(
+    @Param('id') id: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    return this.userService.removeAvatar(id, currentUser);
   }
 
   @Delete(':id')

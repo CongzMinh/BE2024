@@ -1,6 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './modules/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeederModule } from './modules/seeder/seeder.module';
 // import { typeOrmConfig } from './configs/typeorm.config';
@@ -15,6 +14,7 @@ import { ThrottlerExampleModule } from './modules/throttler/throttler.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { PostModule } from './modules/post/post.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -53,6 +53,9 @@ import { PostModule } from './modules/post/post.module';
       }),
     }),
     PostModule,
+    MulterModule.register({
+      dest: './files',
+    }),
   ],
   controllers: [],
   providers: [],

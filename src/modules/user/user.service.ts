@@ -9,13 +9,14 @@ import { UserEntity } from './entities/user.entity';
 import { UserRepository } from './repositories/user.repository';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
 
 @Injectable()
 export class UserService {
   constructor(private userRepo: UserRepository) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const createdUser = await this.userRepo.create(createUserDto);
+  createUser(createUserDto: CreateUserDto) {
+    const createdUser = this.userRepo.create(createUserDto);
     return this.userRepo.save(createdUser);
   }
 
@@ -27,7 +28,7 @@ export class UserService {
     return this.userRepo.findOneBy({ id });
   }
 
-  async findByEmail(email: string): Promise<UserEntity> {
+  findByEmail(email: string): Promise<UserEntity> {
     return this.userRepo.findOne({
       where: {
         email,
@@ -35,7 +36,7 @@ export class UserService {
     });
   }
 
-  async findByPhoneNumber(phoneNumber: string): Promise<UserEntity> {
+  findByPhoneNumber(phoneNumber: string): Promise<UserEntity> {
     return this.userRepo.findOne({
       where: {
         phoneNumber,
@@ -46,6 +47,7 @@ export class UserService {
   async updateUser(
     id: number,
     updateUserDto: UpdateUserDto,
+    avatar: string,
     currentUser: UserEntity,
   ) {
     const user = await this.findOne(id);
@@ -56,10 +58,17 @@ export class UserService {
     if (id !== currentUser.id) {
       throw new ForbiddenException('You do not have permission');
     }
+
+    if (user.avatar) {
+      fs.unlinkSync(user.avatar);
+
+      user.avatar = null;
+    }
+
     user.name = updateUserDto.name;
     user.email = updateUserDto.email;
-    user.phoneNumber = updateUserDto.phoneNumber || '';
-    console.log(user);
+    user.phoneNumber = updateUserDto.phoneNumber;
+    user.avatar = avatar;
     return this.userRepo.save(user);
   }
 
@@ -78,8 +87,6 @@ export class UserService {
       user.password,
     );
 
-    console.log(isMatchPassword);
-
     if (id !== currentUser.id || !isMatchPassword) {
       throw new ForbiddenException();
     }
@@ -87,6 +94,27 @@ export class UserService {
     const salt = await bcrypt.genSalt(+process.env.APP_BCRYPT_SALT);
     user.password = await bcrypt.hash(user.password || user.password, salt);
     return this.userRepo.save(user);
+  }
+
+  async removeAvatar(id: number, currentUser: UserEntity) {
+    const user = await this.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    console.log(currentUser);
+
+    if (id != currentUser.id) {
+      throw new ForbiddenException();
+    }
+
+    if (user.avatar) {
+      fs.unlinkSync(user.avatar);
+
+      user.avatar = null;
+
+      return this.userRepo.save(user);
+    }
   }
 
   remove(id: number) {

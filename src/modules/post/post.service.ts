@@ -6,16 +6,21 @@ import {
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostRepository } from './repositories/post.repository';
 import { UserEntity } from '../user/entities/user.entity';
-import { PostEntity } from './entities/post.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
+import * as fs from 'fs';
 
 @Injectable()
 export class PostService {
   constructor(private postRepo: PostRepository) {}
 
-  create(createPostDto: CreatePostDto, currentUser: UserEntity) {
+  createPost(
+    createPostDto: CreatePostDto,
+    image: string[],
+    currentUser: UserEntity,
+  ) {
     const post = this.postRepo.create(createPostDto);
     post.user = currentUser;
+    post.image = image;
     return this.postRepo.save(post);
   }
 
@@ -47,6 +52,7 @@ export class PostService {
     id: number,
     currentUser: UserEntity,
     updatePostDto: UpdatePostDto,
+    image: string[],
   ) {
     let post = await this.postRepo.findOne({
       where: { id: id },
@@ -60,8 +66,18 @@ export class PostService {
     if (!post.user || post.user.id !== currentUser.id) {
       throw new ForbiddenException('You do not have permission');
     }
-
     post = { ...post, ...updatePostDto };
+    if (post.image && Array.isArray(post.image)) {
+      post.image.forEach((imagePath: string) => {
+        try {
+          fs.unlinkSync(imagePath);
+        } catch (error) {
+          console.error(`Error deleting file: ${imagePath}`, error);
+        }
+      });
+      post.image = null;
+    }
+    post.image = image;
     return this.postRepo.save(post);
   }
 
