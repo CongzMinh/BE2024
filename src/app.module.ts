@@ -1,11 +1,11 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './modules/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeederModule } from './modules/seeder/seeder.module';
 // import { typeOrmConfig } from './configs/typeorm.config';
 import { dataSourceOptions } from './database/data-source';
 // import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
-import { AuthModule } from './modules/auth/auth.module';
 // import { APP_GUARD } from '@nestjs/core';
 // import { RolesGuard } from './modules/auth/roles.guard';
 // import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
@@ -13,6 +13,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerExampleModule } from './modules/throttler/throttler.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { RoomModule } from './modules/room/room.module';
+
+
 import { PostModule } from './modules/post/post.module';
 import { MulterModule } from '@nestjs/platform-express';
 
@@ -24,7 +27,6 @@ import { MulterModule } from '@nestjs/platform-express';
       limit: 10000,
     }),
     ConfigModule.forRoot(),
-    AuthModule,
     SeederModule,
     ThrottlerExampleModule,
     MailerModule.forRootAsync({
@@ -56,6 +58,7 @@ import { MulterModule } from '@nestjs/platform-express';
     MulterModule.register({
       dest: './files',
     }),
+    RoomModule,
   ],
   controllers: [],
   providers: [],
