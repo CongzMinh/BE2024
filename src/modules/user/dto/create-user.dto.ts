@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
-  Length,
 } from 'class-validator';
 
 export class CreateUserDto {

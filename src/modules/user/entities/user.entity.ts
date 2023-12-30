@@ -26,13 +26,14 @@ export class UserEntity {
   @Expose()
   name?: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: null })
   @Expose()
   email: string;
 
   @Column({
     length: 200,
     nullable: true,
+    default: null,
   })
   @Expose()
   phoneNumber?: string;
@@ -42,6 +43,9 @@ export class UserEntity {
   })
   @Expose()
   password: string;
+
+  @Column({ nullable: true, default: null })
+  avatar: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   @Expose()

@@ -21,6 +21,9 @@ export class PostEntity {
   @Column()
   address: string;
 
+  @Column({ type: 'jsonb' })
+  image: string[];
+
   @Column()
   title: string;
 
@@ -36,7 +39,25 @@ export class PostEntity {
   @Column()
   area: number;
 
-  @Column({type: 'jsonb', nullable: true})
+  @Column()
+  capacity: number;
+
+  @Column()
+  electricityPrice: number;
+
+  @Column()
+  waterPrice: number;
+
+  @Column()
+  wifiPrice: number;
+
+  @Column({ nullable: true })
+  serviceCharge: number;
+
+  @Column({ nullable: true })
+  laundryFee: number;
+
+  @Column({ type: 'jsonb', nullable: true })
   utilities: string[];
 
   @CreateDateColumn({
