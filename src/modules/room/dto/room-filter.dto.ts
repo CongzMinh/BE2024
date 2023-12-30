@@ -9,5 +9,5 @@ export class RoomFilterDto {
 
   search_area_max: number;  
 
-  extension: string;
+  utilities: string[];
 }

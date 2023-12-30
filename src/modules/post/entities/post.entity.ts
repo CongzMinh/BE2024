@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
+import { json } from 'stream/consumers';
 
 @Entity({
   name: 'posts',
@@ -35,8 +36,8 @@ export class PostEntity {
   @Column()
   area: number;
 
-  @Column()
-  extension: string;
+  @Column({type: 'jsonb', nullable: true})
+  utilities: string[];
 
   @CreateDateColumn({
     name: 'created_at',

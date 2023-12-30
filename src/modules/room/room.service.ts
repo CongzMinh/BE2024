@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PostRepository } from '../post/repositories/post.repository';
 import { RoomFilterDto } from './dto/room-filter.dto';
-import { Between, Like } from 'typeorm';
+import { Between, In, IsNull, Like, Not } from 'typeorm';
 
 @Injectable()
 export class RoomService {
@@ -36,12 +36,10 @@ export class RoomService {
       where: {
         price: Between(request.search_price_min, request.search_price_max),
         area: Between(request.search_area_min, request.search_area_max),
-        extension: Like(`%${request.extension}%`),
+        utilities: Like(`%${request.utilities}%`),
       },
       order: order,
     });
-
-
 
     return rooms;
   }
