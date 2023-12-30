@@ -1,7 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './modules/user/user.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeederModule } from './modules/seeder/seeder.module';
 // import { typeOrmConfig } from './configs/typeorm.config';
 import { dataSourceOptions } from './database/data-source';
@@ -12,6 +11,11 @@ import { AuthModule } from './modules/auth/auth.module';
 // import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerExampleModule } from './modules/throttler/throttler.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { PostModule } from './modules/post/post.module';
+import { MulterModule } from '@nestjs/platform-express';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),
@@ -19,10 +23,39 @@ import { ThrottlerExampleModule } from './modules/throttler/throttler.module';
       ttl: 60,
       limit: 10000,
     }),
-    ConfigModule,
+    ConfigModule.forRoot(),
     AuthModule,
     SeederModule,
     ThrottlerExampleModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          port: config.get('MAIL_PORT'),
+          secure: true,
+          auth: {
+            user: config.get('MAIL_ACCOUNT'),
+            pass: config.get('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${config.get('MAIL_FROM')}>`,
+        },
+        template: {
+          dir: __dirname + '/templates/email',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+    }),
+    PostModule,
+    MulterModule.register({
+      dest: './files',
+    }),
   ],
   controllers: [],
   providers: [],

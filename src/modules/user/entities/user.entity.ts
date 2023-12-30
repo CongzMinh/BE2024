@@ -5,14 +5,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/shared/enums/user.enum';
+import { PostEntity } from 'src/modules/post/entities/post.entity';
 
 @Entity({
   name: 'users',
@@ -27,21 +26,26 @@ export class UserEntity {
   @Expose()
   name?: string;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   @Expose()
   email: string;
 
   @Column({
     length: 200,
+    nullable: true,
+    default: null,
   })
   @Expose()
-  phonenumber?: string;
+  phoneNumber?: string;
 
   @Column({
     nullable: true,
   })
   @Expose()
   password: string;
+
+  @Column({ nullable: true, default: null })
+  avatar: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   @Expose()
@@ -71,6 +75,9 @@ export class UserEntity {
   })
   @Expose()
   deletedAt?: Date;
+
+  @OneToMany(() => PostEntity, (post) => post.user)
+  posts: PostEntity[];
 
   @BeforeInsert()
   async setPassword(password: string) {
