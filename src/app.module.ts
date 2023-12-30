@@ -18,6 +18,7 @@ import { RoomModule } from './modules/room/room.module';
 
 import { PostModule } from './modules/post/post.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -59,6 +60,8 @@ import { MulterModule } from '@nestjs/platform-express';
       dest: './files',
     }),
     RoomModule,
+    AuthModule,
+
   ],
   controllers: [],
   providers: [],
