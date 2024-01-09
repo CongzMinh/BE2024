@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsPhoneNumber,
 } from 'class-validator';
+import { Role } from 'src/shared/enums/user.enum';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -28,4 +29,9 @@ export class CreateUserDto {
   })
   @IsNotEmpty()
   password: string;
+
+  @IsNotEmpty()
+  isHost: boolean;
+
+  role: Role;
 }

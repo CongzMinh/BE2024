@@ -28,7 +28,7 @@ export class UserService {
     return this.userRepo.findOneBy({ id });
   }
 
-  findByEmail(email: string): Promise<UserEntity> {
+  findByEmail(email: string) {
     return this.userRepo.findOne({
       where: {
         email,
@@ -36,7 +36,7 @@ export class UserService {
     });
   }
 
-  findByPhoneNumber(phoneNumber: string): Promise<UserEntity> {
+  findByPhoneNumber(phoneNumber: string) {
     return this.userRepo.findOne({
       where: {
         phoneNumber,
