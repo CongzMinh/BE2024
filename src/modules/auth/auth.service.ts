@@ -1,8 +1,6 @@
 import {
   BadRequestException,
   CACHE_MANAGER,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -11,27 +9,20 @@ import {
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from '../user/entities/user.entity';
-import { LoginWithWalletDto } from './dto/login-wallet.dto';
-import { ResponseLogin } from './dto/respone-login.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { checkRecoverSameAddress } from 'src/shared/helper/utils';
-import { httpErrors } from 'src/shared/helper/exceptions';
 import { JwtPayload } from './jwt.payload';
 import { createHash } from 'crypto';
 import { AUTH_CACHE_PREFIX, jwtConstants } from './auth.constants';
 import { Cache } from 'cache-manager';
-import { async } from 'rxjs';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import * as otpGenerator from 'otp-generator';
 import { MailerService } from '@nestjs-modules/mailer';
-import { config } from 'dotenv';
-import { InjectRepository } from '@nestjs/typeorm';
-import { OtpEntity } from './entities/otp.entity';
-import { LessThan, Repository } from 'typeorm';
+import { LessThan } from 'typeorm';
 import { OtpRepository } from './repositories/otp.respository';
 import { UserRepository } from '../user/repositories/user.repository';
+import { Role } from 'src/shared/enums/user.enum';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -70,23 +61,41 @@ export class AuthService {
   }
 
   //Register
-  async register(registerDto: RegisterDto): Promise<any> {
+  async register(createUser: CreateUserDto): Promise<any> {
+    if (!createUser.email && !createUser.phoneNumber) {
+      throw new BadRequestException();
+    }
+
     //check email axist
-    const userByEmail = await this.userService.findByEmail(registerDto.email);
+    const userByEmail = await this.userService.findByEmail(createUser.email);
     if (userByEmail) {
       throw new BadRequestException('Email ready axist!');
     }
 
     //check phonenumber axist
     const userByPhoneNumber = await this.userService.findByPhoneNumber(
-      registerDto.phoneNumber,
+      createUser.phoneNumber,
     );
     if (userByPhoneNumber) {
       throw new BadRequestException('Phone number ready axist!');
     }
 
+    if (createUser.phoneNumber === '' || !createUser.phoneNumber) {
+      createUser.phoneNumber = null;
+    }
+
+    if (createUser.email === '' || !createUser.email) {
+      createUser.email = null;
+    }
+
+    if (createUser.isHost) {
+      createUser.role = Role.ADMIN;
+    } else {
+      createUser.role = Role.USER;
+    }
+
     //save to db
-    const savedUser = await this.userService.createUser(registerDto);
+    const savedUser = await this.userService.createUser(createUser);
 
     //generate Jwt token
     const payload = { userId: savedUser.id, email: savedUser.email };

@@ -8,16 +8,13 @@ import {
   Get,
   Request,
   Param,
-  Query,
+
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ResponseDto } from 'src/shared/dtos/response.dto';
-import { ResponseLogin } from './dto/respone-login.dto';
-import { LoginWithWalletDto } from './dto/login-wallet.dto';
-import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -32,9 +29,10 @@ export class AuthController {
   }
 
   @Post('register')
-  signUp(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  signUp(@Body() request: CreateUserDto) {
+    return this.authService.register(request);
   }
+
 
   @Post('email/forgot-password/:email')
   validateOtp(@Param('email') email: string, @Body() otp: string) {
