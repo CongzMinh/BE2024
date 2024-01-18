@@ -3,7 +3,6 @@ dotenv.config();
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { RolesGuard } from './modules/auth/roles.guard';
 
 const appPort = process.env.APP_PORT;
 // const appEnv = process.env.APP_ENV
