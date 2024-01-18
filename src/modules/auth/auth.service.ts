@@ -6,7 +6,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from '../user/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +22,7 @@ import { OtpRepository } from './repositories/otp.respository';
 import { UserRepository } from '../user/repositories/user.repository';
 import { Role } from 'src/shared/enums/user.enum';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {

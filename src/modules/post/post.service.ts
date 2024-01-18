@@ -1,17 +1,27 @@
 import {
+
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
-import { PostRepository } from './repositories/post.repository';
 import { UserEntity } from '../user/entities/user.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 import * as fs from 'fs';
 
+import { UserRepository } from '../user/repositories/user.repository';
+import { PostRepository } from './repositories/post.repository';
+import { FavoritePostRepository } from './repositories/favorite-post.reponsitory';
+import { CommentRepository } from './repositories/comment.repository';
+
 @Injectable()
 export class PostService {
-  constructor(private postRepo: PostRepository) {}
+  constructor(
+    private userRepo: UserRepository,
+    private postRepo: PostRepository,
+    private favoritePostRepo: FavoritePostRepository,
+    private commentRepo: CommentRepository,
+  ) {}
 
   createPost(
     createPostDto: CreatePostDto,
@@ -96,5 +106,102 @@ export class PostService {
     }
 
     return this.postRepo.remove(post);
+  }
+
+  //Favorite Posy Function
+
+  async likePost(userId: number, postId: number): Promise<void> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const post = await this.postRepo.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    const existingFavorite = await this.favoritePostRepo.findOne({
+      where: { user: { id: userId }, post: { id: postId } },
+    });
+
+    if (!existingFavorite) {
+      const newFavorite = this.favoritePostRepo.create({
+        user: user,
+        post: post,
+      });
+      await this.favoritePostRepo.save(newFavorite);
+    }
+  }
+
+  async getLikedPosts(userId: number) {
+    try {
+      const favorites = await this.favoritePostRepo.find({
+        where: { user: { id: userId } },
+        relations: ['post'],
+      });
+      return favorites;
+    } catch (error) {
+      throw new Error(`Error retrieving liked posts: ${error.message}`);
+    }
+  }
+
+  async unlikePost(userId: number, postId: number): Promise<void> {
+    try {
+      // Find the FavoritePostEntity to delete
+      const favoriteToRemove = await this.favoritePostRepo.findOne({
+        where: { user: { id: userId }, post: { id: postId } },
+      });
+
+      if (!favoriteToRemove) {
+        throw new Error('Favorite not found');
+      }
+
+      // Remove the favorite from the database
+      await this.favoritePostRepo.remove(favoriteToRemove);
+
+      console.log(
+        `Successfully removed like for user ${userId} on post ${postId}`,
+      );
+    } catch (error) {
+      console.error(`Error removing like: ${error.message}`);
+      throw new Error(`Error removing like: ${error.message}`);
+    }
+  }
+
+  async getLikesCount(postId: number): Promise<number> {
+    try {
+      // Count the number of likes for the specified post
+      const likesCount = await this.favoritePostRepo.count({
+        where: { post: { id: postId } },
+      });
+
+      return likesCount;
+    } catch (error) {
+      console.error(`Error retrieving likes count: ${error.message}`);
+      throw new Error(`Error retrieving likes count: ${error.message}`);
+    }
+  }
+
+  //Comment Function
+  async createComment(
+    userId: number,
+    postId: number,
+    content: string,
+  ): Promise<any> {
+    const comment = this.commentRepo.create({
+      user: { id: userId },
+      post: { id: postId },
+      content,
+    });
+
+    return await this.commentRepo.save(comment);
+  }
+
+  async getCommentsByPost(postId: number): Promise<any> {
+    return this.commentRepo.find({
+      where: { post: { id: postId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 }

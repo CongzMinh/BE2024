@@ -61,7 +61,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     RoomModule,
     AuthModule,
-
+    UserModule
   ],
   controllers: [],
   providers: [],

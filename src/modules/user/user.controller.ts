@@ -12,7 +12,6 @@ import {
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/shared/decoratos/get-request-user.decorator';
@@ -26,6 +25,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'src/configs/multer.config';
 import { extname } from 'path';
+import { UserService } from './user.service';
 
 @Controller('user')
 @ApiTags('Users')
@@ -34,7 +34,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.USER)
   @Get()
   // @LogExecutionTime()
   async findAll(@GetUser() user) {
@@ -69,7 +68,6 @@ export class UserController {
       },
     }),
   )
-
   @Put('update/:id')
   updateUser(
     @Request() req: any,
