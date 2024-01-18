@@ -2,6 +2,9 @@ import { IsNotEmpty, Length } from 'class-validator';
 
 export class UpdatePostDto {
   @IsNotEmpty()
+  published: boolean;
+
+  @IsNotEmpty()
   address: string;
 
   @IsNotEmpty()

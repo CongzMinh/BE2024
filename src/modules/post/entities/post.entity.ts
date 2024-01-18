@@ -21,6 +21,9 @@ export class PostEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'boolean' })
+  published: boolean;
+
   @Column()
   address: string;
 
