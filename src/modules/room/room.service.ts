@@ -11,14 +11,13 @@ export class RoomService {
   async getAll(): Promise<PostEntity[]> {
     return this.postRepo.find({
       where: { published: true },
-      relations: ['user', 'comments'],
     });
   }
 
   async getDetail(id: number): Promise<PostEntity | undefined> {
     const zoom = await this.postRepo.findOne({
       where: { id, published: true },
-      relations: ['user'],
+      relations: ['user', 'comments'],
     });
     if (!zoom) {
       throw new BadRequestException('Can not found!');
