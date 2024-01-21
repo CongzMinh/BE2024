@@ -23,6 +23,7 @@ import { UserRepository } from '../user/repositories/user.repository';
 import { Role } from 'src/shared/enums/user.enum';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
+import { ForgotPassDto } from './dto/forgotPass.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +49,7 @@ export class AuthService {
       userByEmail.password,
     );
     if (!isMatchPassword) {
-      throw new BadRequestException();
+      throw new BadRequestException('Pass is false');
     }
 
     const payload = {
@@ -125,7 +126,7 @@ export class AuthService {
 
     //send otp to email
     await this.mailerService.sendMail({
-      to: 'mamtoi123456789@gmail.com',
+      to: email,
       template: './sendEmailOtp',
       context: {
         code: otp,
@@ -133,16 +134,16 @@ export class AuthService {
     });
   }
 
-  async validateOtp(email: string, otp: string): Promise<any> {
+  async validateOtp(forgotPassDto: ForgotPassDto): Promise<any> {
     //clear otp
-
+    console.log("========" + forgotPassDto.email);
     await this.otpRepo.delete({ expiredAt: LessThan(new Date()) });
 
     const userByEmailOtp = await this.otpRepo.findOne({
-      where: { email: email },
+      where: { email: forgotPassDto.email },
     });
-    console.log(userByEmailOtp);
-    if (userByEmailOtp && userByEmailOtp.otp == otp) {
+    console.log(userByEmailOtp)
+    if (userByEmailOtp && userByEmailOtp.otp == forgotPassDto.otp) {
       return 'Otp is valid';
     } else {
       throw new NotFoundException('Otp is invalid');
@@ -150,6 +151,7 @@ export class AuthService {
   }
 
   async resetPassword(email: string, password: string): Promise<any> {
+    console.log(password);
     const userByEmailOtp = await this.otpRepo.findOne({
       where: { email },
     });
@@ -157,12 +159,8 @@ export class AuthService {
     const userByEmail = await this.userService.findByEmail(email);
 
     if (userByEmailOtp) {
-      userByEmail.password = password;
       const salt = await bcrypt.genSalt(+process.env.APP_BCRYPT_SALT);
-      userByEmail.password = await bcrypt.hash(
-        userByEmail.password || userByEmail.password,
-        salt,
-      );
+      userByEmail.password = await bcrypt.hash(password, salt);
       return this.userRepo.save(userByEmail);
     }
   }

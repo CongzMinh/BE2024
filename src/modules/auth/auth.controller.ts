@@ -8,6 +8,7 @@ import {
   Get,
   Request,
   Param,
+  Put,
 
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -15,6 +16,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { ForgotPassDto } from './dto/forgotPass.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,9 +36,9 @@ export class AuthController {
   }
 
 
-  @Post('email/forgot-password/:email')
-  validateOtp(@Param('email') email: string, @Body() otp: string) {
-    return this.authService.validateOtp(email, otp);
+  @Post('email/validate-otp')
+  validateOtp(@Body() forgotPassDto: ForgotPassDto) {
+    return this.authService.validateOtp(forgotPassDto);
   }
 
   @Post('email/forgot-password')
@@ -44,11 +46,10 @@ export class AuthController {
     return this.authService.sendEmailOtp(email);
   }
 
-  @Post('reset-password/:email/:otp')
+  @Put('reset-password/:email')
   resetPassword(
     @Param('email') email: string,
-    @Param('otp') otp: string,
-    @Body() password: string,
+    @Body('password') password: string,
   ) {
     return this.authService.resetPassword(email, password);
   }

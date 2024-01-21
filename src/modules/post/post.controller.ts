@@ -6,10 +6,8 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Put,
-  Req,
   Request,
   UploadedFiles,
   UseGuards,
@@ -25,7 +23,6 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'src/configs/multer.config';
 import { extname } from 'path';
-import { PostEntity } from './entities/post.entity';
 
 @Controller('post')
 @ApiTags('Posts')
@@ -34,14 +31,6 @@ import { PostEntity } from './entities/post.entity';
 @UseGuards(JwtAuthGuard)
 export class PostController {
   constructor(private postService: PostService) {}
-
-  @Get('liked')
-  async getLikedPosts(@Req() req) {
-    console.log('============================' + req.user.id);
-    const userId = req.user.id;
-    const likedPosts = await this.postService.getLikedPosts(userId);
-    return likedPosts;
-  }
 
   @Post('create')
   @UseInterceptors(
@@ -74,9 +63,7 @@ export class PostController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
-    const filepaths = file.map(
-      (file) => file.destination + '/' + file.filename,
-    );
+    const filepaths = file.map((file) => file.filename);
     return this.postService.createPost(createPostDto, filepaths, currentUser);
   }
 
@@ -122,9 +109,7 @@ export class PostController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
-    const filepaths = file.map(
-      (file) => file.destination + '/' + file.filename,
-    );
+    const filepaths = file.map((file) => file.filename);
     return this.postService.updateById(
       id,
       currentUser,
@@ -133,49 +118,9 @@ export class PostController {
     );
   }
 
-  @Post(':postId/like')
-  async likePost(@Req() req, @Param('postId') postId: number): Promise<void> {
-    const userId = req.user.id;
-    await this.postService.likePost(userId, postId);
-  }
-
-  @Delete(':postId/unlike')
-  async unlikePost(
-    @Req() req: any,
-    @Param('postId', ParseIntPipe) postId: number,
-  ): Promise<void> {
-    const userId = req.user.id;
-
-    await this.postService.unlikePost(userId, postId);
-  }
-
-  @Get(':postId/likes-count')
-  async getLikesCount(
-    @Param('postId', ParseIntPipe) postId: number,
-  ): Promise<{ likesCount: number }> {
-    const likesCount = await this.postService.getLikesCount(postId);
-
-    return { likesCount };
-  }
-
   @Delete(':id')
   deletePost(@Param('id') id: number, @CurrentUser() currentUser: UserEntity) {
     return this.postService.delete(id, currentUser);
   }
 
-  @Post(':postId/comment')
-  async createComment(
-    @Req() req: any,
-    @Param('postId', ParseIntPipe) postId: number,
-    @Body('content') content: string,
-  ) {
-    const userId = req.user.id; // Assuming your user object has an 'id' property
-
-    return this.postService.createComment(userId, postId, content);
-  }
-
-  @Get(':postId/comment')
-  async getCommentsByPost(@Param('postId', ParseIntPipe) postId: number) {
-    return this.postService.getCommentsByPost(postId);
-  }
 }

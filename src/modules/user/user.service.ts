@@ -87,12 +87,13 @@ export class UserService {
       user.password,
     );
 
+    console.log(isMatchPassword);
+    console.log(id + '============' + currentUser.id);
     if (id !== currentUser.id || !isMatchPassword) {
       throw new ForbiddenException();
     }
-    user.password = updatePasswordDto.newPassword;
     const salt = await bcrypt.genSalt(+process.env.APP_BCRYPT_SALT);
-    user.password = await bcrypt.hash(user.password || user.password, salt);
+    user.password = await bcrypt.hash(updatePasswordDto.newPassword, salt);
     return this.userRepo.save(user);
   }
 
