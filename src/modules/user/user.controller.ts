@@ -16,8 +16,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/shared/decoratos/get-request-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from 'src/shared/decoratos/role.decorator';
-import { Role } from 'src/shared/enums/user.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { CurrentUser } from './decorators/currentUser.decorator';
 import { UserEntity } from './entities/user.entity';
@@ -82,7 +80,7 @@ export class UserController {
     return this.userService.updateUser(
       id,
       updateUserDto,
-      file.destination + '/' + file.filename,
+      file.filename,
       currentUser,
     );
   }
@@ -96,6 +94,7 @@ export class UserController {
   ) {
     return this.userService.updatePassword(id, updatePasswordDto, currentUser);
   }
+
 
   @UseGuards(JwtAuthGuard)
   @Delete('avatar/:id')

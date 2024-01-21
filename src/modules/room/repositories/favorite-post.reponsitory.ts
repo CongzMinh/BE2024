@@ -1,6 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { FavoritePostEntity } from '../entities/favorite-post.entity';
+import { FavoritePostEntity } from '../../post/entities/favorite-post.entity';
 
 @Injectable()
 export class FavoritePostRepository extends Repository<FavoritePostEntity> {

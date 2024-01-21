@@ -8,6 +8,4 @@ export class RoomFilterDto {
   search_area_min: number;
 
   search_area_max: number;  
-
-  utilities: string[];
 }
