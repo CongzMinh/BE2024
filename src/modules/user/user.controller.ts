@@ -100,11 +100,9 @@ export class UserController {
 
 
   @UseGuards(JwtAuthGuard)
-  @Delete('avatar/:id')
-  deleteAvatar(
-    @Param('id') id: number,
-    @CurrentUser() currentUser: UserEntity,
-  ) {
+  @Delete('avatar')
+  deleteAvatar(@Req() req, @CurrentUser() currentUser: UserEntity) {
+    const id = req.user.id;
     return this.userService.removeAvatar(id, currentUser);
   }
 
