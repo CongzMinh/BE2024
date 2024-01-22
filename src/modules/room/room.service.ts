@@ -10,6 +10,7 @@ import { PostEntity } from '../post/entities/post.entity';
 import { UserRepository } from '../user/repositories/user.repository';
 import { FavoritePostRepository } from './repositories/favorite-post.reponsitory';
 import { CommentRepository } from './repositories/comment.repository';
+import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class RoomService {
@@ -127,17 +128,23 @@ export class RoomService {
     }
   }
 
-  async getLikesCount(roomId: number): Promise<number> {
+  async getLikesInfo(
+    roomId: number,
+  ): Promise<{ likesCount: number; likedUsers: UserEntity[] }> {
     try {
-      // Count the number of likes for the specified post
-      const likesCount = await this.favoritePostRepo.count({
+      // Retrieve likes count and liked users for the specified post
+      const likedPosts = await this.favoritePostRepo.find({
         where: { post: { id: roomId } },
+        relations: ['user'], // Assuming there is a relationship between FavoritePostEntity and UserEntity
       });
-
-      return likesCount;
+  
+      const likesCount = likedPosts.length;
+      const likedUsers = likedPosts.map((favorite) => favorite.user);
+  
+      return { likesCount, likedUsers };
     } catch (error) {
-      console.error(`Error retrieving likes count: ${error.message}`);
-      throw new Error(`Error retrieving likes count: ${error.message}`);
+      console.error(`Error retrieving likes info: ${error.message}`);
+      throw new Error(`Error retrieving likes info: ${error.message}`);
     }
   }
 

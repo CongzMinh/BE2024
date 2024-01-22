@@ -15,6 +15,7 @@ import { RoomService } from './room.service';
 import { RoomFilterDto } from './dto/room-filter.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserEntity } from '../user/entities/user.entity';
 
 @ApiTags('Room')
 @Controller('room')
@@ -43,14 +44,13 @@ export class RoomController {
     await this.roomService.unlikePost(userId, roomId);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':roomId/likes-count')
-  async getLikesCount(
-    @Param('roomId', ParseIntPipe) postId: number,
-  ): Promise<{ likesCount: number }> {
-    const likesCount = await this.roomService.getLikesCount(postId);
+  @Get(':roomId/likes-info')
+  async getLikesInfo(
+    @Param('roomId', ParseIntPipe) roomId: number,
+  ): Promise<{ likesCount: number; likedUsers: UserEntity[] }> {
+    const likesInfo = await this.roomService.getLikesInfo(roomId);
 
-    return { likesCount };
+    return likesInfo;
   }
 
   @UseGuards(JwtAuthGuard)
