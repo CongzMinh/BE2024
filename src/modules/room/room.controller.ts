@@ -14,12 +14,10 @@ import {
 import { RoomService } from './room.service';
 import { RoomFilterDto } from './dto/room-filter.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Room')
 @Controller('room')
-@UseGuards(RolesGuard, JwtAuthGuard)
 export class RoomController {
   constructor(private roomService: RoomService) {}
   @Post('search')
@@ -27,12 +25,14 @@ export class RoomController {
     return this.roomService.getAllWithFilter(request);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':roomId/like')
   async likePost(@Req() req, @Param('roomId') roomId: number): Promise<void> {
     const userId = req.user.id;
     await this.roomService.likePost(userId, roomId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':roomId/unlike')
   async unlikePost(
     @Req() req: any,
@@ -43,6 +43,7 @@ export class RoomController {
     await this.roomService.unlikePost(userId, roomId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':roomId/likes-count')
   async getLikesCount(
     @Param('roomId', ParseIntPipe) postId: number,
@@ -52,6 +53,7 @@ export class RoomController {
     return { likesCount };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':roomId/comment')
   async createComment(
     @Req() req: any,
@@ -63,6 +65,7 @@ export class RoomController {
     return this.roomService.createComment(userId, postId, content);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('liked')
   async getLikedPosts(@Req() req) {
     const userId = req.user.id;
