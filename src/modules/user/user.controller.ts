@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -66,10 +67,9 @@ export class UserController {
       },
     }),
   )
-  @Put('update/:id')
+  @Put('update-account')
   updateUser(
     @Request() req: any,
-    @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: UserEntity,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
@@ -77,6 +77,8 @@ export class UserController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
+    const id = req.user.id;
+    console.log(id);
     return this.userService.updateUser(
       id,
       updateUserDto,
@@ -86,12 +88,13 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('update/password/:id')
+  @Put('update/password')
   updatePassword(
-    @Param('id', ParseIntPipe) id: number,
+    @Req() req,
     @CurrentUser() currentUser: UserEntity,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
+    const id = req.user.id;
     return this.userService.updatePassword(id, updatePasswordDto, currentUser);
   }
 

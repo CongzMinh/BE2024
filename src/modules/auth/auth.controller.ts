@@ -9,7 +9,6 @@ import {
   Request,
   Param,
   Put,
-
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -34,7 +33,6 @@ export class AuthController {
   signUp(@Body() request: CreateUserDto) {
     return this.authService.register(request);
   }
-
 
   @Post('email/validate-otp')
   validateOtp(@Body() forgotPassDto: ForgotPassDto) {
