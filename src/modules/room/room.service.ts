@@ -11,6 +11,7 @@ import { UserRepository } from '../user/repositories/user.repository';
 import { FavoritePostRepository } from './repositories/favorite-post.reponsitory';
 import { CommentRepository } from './repositories/comment.repository';
 import { UserEntity } from '../user/entities/user.entity';
+import { SearchRoomDto } from './dto/room-search.dto';
 
 @Injectable()
 export class RoomService {
@@ -65,6 +66,17 @@ export class RoomService {
     });
 
     return rooms;
+  }
+
+  async searchRoomsByAddress(
+    searchRoomDto: SearchRoomDto,
+  ): Promise<PostEntity[]> {
+    const { address } = searchRoomDto;
+    console.log('Search Criteria:', { address: ILike(`%${address}%`) });
+
+    return this.postRepo.find({
+      where: { address: ILike(`%${address}%`) },
+    });
   }
 
   //Favorite Posy Function

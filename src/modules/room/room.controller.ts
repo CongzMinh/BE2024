@@ -16,14 +16,23 @@ import { RoomFilterDto } from './dto/room-filter.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserEntity } from '../user/entities/user.entity';
+import { PostEntity } from '../post/entities/post.entity';
+import { SearchRoomDto } from './dto/room-search.dto';
 
 @ApiTags('Room')
 @Controller('room')
 export class RoomController {
   constructor(private roomService: RoomService) {}
-  @Post('search')
+  @Post('filter')
   getAllWithFilter(@Query() request: RoomFilterDto) {
     return this.roomService.getAllWithFilter(request);
+  }
+
+  @Get('search')
+  searchRoomsByAddress(
+    @Body() searchRoomDto: SearchRoomDto,
+  ): Promise<PostEntity[]> {
+    return this.roomService.searchRoomsByAddress(searchRoomDto);
   }
 
   @UseGuards(JwtAuthGuard)
