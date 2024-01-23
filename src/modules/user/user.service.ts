@@ -47,7 +47,6 @@ export class UserService {
   async updateUser(
     id: number,
     updateUserDto: UpdateUserDto,
-    avatar: string,
     currentUser: UserEntity,
   ) {
     const user = await this.findOne(id);
@@ -59,6 +58,41 @@ export class UserService {
       throw new ForbiddenException('You do not have permission');
     }
   
+    // try {
+    //   // Check and delete the existing avatar if it exists
+    //   if (user.avatar && fs.existsSync(user.avatar)) {
+    //     fs.unlinkSync(user.avatar);
+    //   }
+    // } catch (error) {
+    //   console.error('Error deleting avatar:', error);
+    //   // Handle the error or log it appropriately
+    // }
+  
+    // Update user information
+    user.name = updateUserDto.name;
+    user.email = updateUserDto.email;
+    user.phoneNumber = updateUserDto.phoneNumber;
+  
+    // Update avatar only if provided
+    // if (avatar) {
+    //   user.avatar = avatar;
+    // } else {
+    //   user.avatar = null;
+    // }
+  
+    return this.userRepo.save(user);
+  }
+
+  async updateAvatar(id: number, avatar: string, currentUser: UserEntity) {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+  
+    if (id !== currentUser.id) {
+      throw new ForbiddenException('You do not have permission');
+    }
+
     try {
       // Check and delete the existing avatar if it exists
       if (user.avatar && fs.existsSync(user.avatar)) {
@@ -68,18 +102,12 @@ export class UserService {
       console.error('Error deleting avatar:', error);
       // Handle the error or log it appropriately
     }
-  
-    // Update user information
-    user.name = updateUserDto.name;
-    user.email = updateUserDto.email;
-    user.phoneNumber = updateUserDto.phoneNumber;
-  
     // Update avatar only if provided
     if (avatar) {
       user.avatar = avatar;
+    } else {
+      user.avatar = null;
     }
-  
-    return this.userRepo.save(user);
   }
   
   async updatePassword(

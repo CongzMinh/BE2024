@@ -38,27 +38,57 @@ export class AuthService {
 
   //signIn
   async signIn(loginDto: LoginDto): Promise<any> {
-    const userByEmail = await this.userService.findByEmail(loginDto.email);
-    if (!userByEmail) {
-      throw new UnauthorizedException();
+    if (!loginDto.email && !loginDto.phoneNumber) {
+      throw new BadRequestException();
     }
 
-    //check password
-    const isMatchPassword = await bcrypt.compare(
-      loginDto.password,
-      userByEmail.password,
-    );
-    if (!isMatchPassword) {
-      throw new BadRequestException('Pass is false');
+    if (loginDto.email || loginDto.email != '') {
+      const userByEmail = await this.userService.findByEmail(loginDto.email);
+      if (!userByEmail) {
+        throw new UnauthorizedException('email');
+      }
+      //check password
+      const isMatchPassword = await bcrypt.compare(
+        loginDto.password,
+        userByEmail.password,
+      );
+      if (!isMatchPassword) {
+        throw new BadRequestException('Pass is false');
+      }
+
+      const payload = {
+        userId: userByEmail.id,
+        email: userByEmail.email,
+      };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
     }
 
-    const payload = {
-      userId: userByEmail.id,
-      email: userByEmail.email,
-    };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+    if (loginDto.phoneNumber || loginDto.phoneNumber != '') {
+      const userByPhoneNumber = await this.userService.findByPhoneNumber(
+        loginDto.phoneNumber,
+      );
+      if (!userByPhoneNumber) {
+        throw new UnauthorizedException('phone');
+      }
+      //check password
+      const isMatchPassword = await bcrypt.compare(
+        loginDto.password,
+        userByPhoneNumber.password,
+      );
+      if (!isMatchPassword) {
+        throw new BadRequestException('Pass is false');
+      }
+
+      const payload = {
+        userId: userByPhoneNumber.id,
+        email: userByPhoneNumber.email,
+      };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    }
   }
 
   //Register
@@ -136,13 +166,13 @@ export class AuthService {
 
   async validateOtp(forgotPassDto: ForgotPassDto): Promise<any> {
     //clear otp
-    console.log("========" + forgotPassDto.email);
+    console.log('========' + forgotPassDto.email);
     await this.otpRepo.delete({ expiredAt: LessThan(new Date()) });
 
     const userByEmailOtp = await this.otpRepo.findOne({
       where: { email: forgotPassDto.email },
     });
-    console.log(userByEmailOtp)
+    console.log(userByEmailOtp);
     if (userByEmailOtp && userByEmailOtp.otp == forgotPassDto.otp) {
       return 'Otp is valid';
     } else {
