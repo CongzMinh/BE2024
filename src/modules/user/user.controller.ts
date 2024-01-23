@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   BadRequestException,
   Req,
+  Res,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -43,6 +44,11 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
+  }
+
+  @Get('uploaded/:avatarpth')
+  seeUploadedFile(@Param('avatarpth') image: string, @Res() res: any) {
+    return res.sendFile(image, { root: 'uploads/avatar' });
   }
 
   @UseGuards(JwtAuthGuard)
