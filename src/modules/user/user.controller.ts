@@ -74,7 +74,7 @@ export class UserController {
     }),
   )
   @Put('update-account')
-  updateUser(
+  async updateUser(
     @Request() req: any,
     @CurrentUser() currentUser: UserEntity,
     @Body() updateUserDto: UpdateUserDto,
@@ -84,13 +84,11 @@ export class UserController {
       throw new BadRequestException(req.fileValidationError);
     }
     const id = req.user.id;
-    console.log(id);
-    return this.userService.updateUser(
-      id,
-      updateUserDto,
-      file.filename,
-      currentUser,
-    );
+    if (file && file.filename) {
+      // If a file is uploaded, update the avatar
+      await this.userService.updateAvatar(id, file.filename, currentUser);
+    }
+    return this.userService.updateUser(id, updateUserDto, currentUser);
   }
 
   @UseGuards(JwtAuthGuard)
