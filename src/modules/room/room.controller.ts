@@ -28,7 +28,7 @@ export class RoomController {
     return this.roomService.getAllWithFilter(request);
   }
 
-  @Get('search')
+  @Post('search')
   searchRoomsByAddress(
     @Body() searchRoomDto: SearchRoomDto,
   ): Promise<PostEntity[]> {
