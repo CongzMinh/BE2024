@@ -24,7 +24,7 @@ import { SearchRoomDto } from './dto/room-search.dto';
 export class RoomController {
   constructor(private roomService: RoomService) {}
   @Post('filter')
-  getAllWithFilter(@Query() request: RoomFilterDto) {
+  getAllWithFilter(@Body() request: RoomFilterDto) {
     return this.roomService.getAllWithFilter(request);
   }
 
