@@ -4,10 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
-import { PostRepository } from './repositories/post.repository';
 import { UserEntity } from '../user/entities/user.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 import * as fs from 'fs';
+import { PostRepository } from './repositories/post.repository';
+
 
 @Injectable()
 export class PostService {
@@ -97,4 +98,5 @@ export class PostService {
 
     return this.postRepo.remove(post);
   }
+
 }

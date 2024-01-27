@@ -11,14 +11,13 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Req,
+  Res,
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/shared/decoratos/get-request-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from 'src/shared/decoratos/role.decorator';
-import { Role } from 'src/shared/enums/user.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { CurrentUser } from './decorators/currentUser.decorator';
 import { UserEntity } from './entities/user.entity';
@@ -26,6 +25,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'src/configs/multer.config';
 import { extname } from 'path';
+import { UserService } from './user.service';
 
 @Controller('user')
 @ApiTags('Users')
@@ -34,7 +34,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.USER)
   @Get()
   // @LogExecutionTime()
   async findAll(@GetUser() user) {
@@ -45,6 +44,11 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
+  }
+
+  @Get('uploaded/:avatarpth')
+  seeUploadedFile(@Param('avatarpth') image: string, @Res() res: any) {
+    return res.sendFile(image, { root: 'uploads/avatar' });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -69,11 +73,9 @@ export class UserController {
       },
     }),
   )
-
-  @Put('update/:id')
-  updateUser(
+  @Put('update-account')
+  async updateUser(
     @Request() req: any,
-    @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: UserEntity,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
@@ -81,30 +83,30 @@ export class UserController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
-    return this.userService.updateUser(
-      id,
-      updateUserDto,
-      file.destination + '/' + file.filename,
-      currentUser,
-    );
+    const id = req.user.id;
+    if (file && file.filename) {
+      // If a file is uploaded, update the avatar
+      await this.userService.updateAvatar(id, file.filename, currentUser);
+    }
+    return this.userService.updateUser(id, updateUserDto, currentUser);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('update/password/:id')
+  @Put('update/password')
   updatePassword(
-    @Param('id', ParseIntPipe) id: number,
+    @Req() req,
     @CurrentUser() currentUser: UserEntity,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
+    const id = req.user.id;
     return this.userService.updatePassword(id, updatePasswordDto, currentUser);
   }
 
+
   @UseGuards(JwtAuthGuard)
-  @Delete('avatar/:id')
-  deleteAvatar(
-    @Param('id') id: number,
-    @CurrentUser() currentUser: UserEntity,
-  ) {
+  @Delete('avatar')
+  deleteAvatar(@Req() req, @CurrentUser() currentUser: UserEntity) {
+    const id = req.user.id;
     return this.userService.removeAvatar(id, currentUser);
   }
 

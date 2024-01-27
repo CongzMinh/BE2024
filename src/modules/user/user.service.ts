@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -47,31 +48,52 @@ export class UserService {
   async updateUser(
     id: number,
     updateUserDto: UpdateUserDto,
-    avatar: string,
     currentUser: UserEntity,
   ) {
     const user = await this.findOne(id);
     if (!user) {
       throw new NotFoundException('User does not exist');
     }
-
+  
     if (id !== currentUser.id) {
       throw new ForbiddenException('You do not have permission');
-    }
-
-    if (user.avatar) {
-      fs.unlinkSync(user.avatar);
-
-      user.avatar = null;
     }
 
     user.name = updateUserDto.name;
     user.email = updateUserDto.email;
     user.phoneNumber = updateUserDto.phoneNumber;
-    user.avatar = avatar;
+
     return this.userRepo.save(user);
   }
 
+  async updateAvatar(id: number, avatar: string, currentUser: UserEntity) {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+    
+    if (id !== currentUser.id) {
+      throw new ForbiddenException('You do not have permission');
+    }
+    
+    try {
+      // Check and delete the existing avatar if it exists
+      if (user.avatar && fs.existsSync(user.avatar)) {
+        fs.unlinkSync(user.avatar);
+      }
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
+      // Handle the error or log it appropriately
+    }
+    // Update avatar only if provided
+    if (avatar) {
+      user.avatar = avatar;
+    } else {
+      user.avatar = user.avatar;
+    }
+    return this.userRepo.save(user);
+  }
+  
   async updatePassword(
     id: number,
     updatePasswordDto: UpdatePasswordDto,
@@ -87,12 +109,13 @@ export class UserService {
       user.password,
     );
 
+    console.log(isMatchPassword);
+    console.log(id + '============' + currentUser.id);
     if (id !== currentUser.id || !isMatchPassword) {
       throw new ForbiddenException();
     }
-    user.password = updatePasswordDto.newPassword;
     const salt = await bcrypt.genSalt(+process.env.APP_BCRYPT_SALT);
-    user.password = await bcrypt.hash(user.password || user.password, salt);
+    user.password = await bcrypt.hash(updatePasswordDto.newPassword, salt);
     return this.userRepo.save(user);
   }
 

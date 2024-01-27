@@ -6,7 +6,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from '../user/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +22,8 @@ import { OtpRepository } from './repositories/otp.respository';
 import { UserRepository } from '../user/repositories/user.repository';
 import { Role } from 'src/shared/enums/user.enum';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { UserService } from '../user/user.service';
+import { ForgotPassDto } from './dto/forgotPass.dto';
 
 @Injectable()
 export class AuthService {
@@ -37,27 +38,57 @@ export class AuthService {
 
   //signIn
   async signIn(loginDto: LoginDto): Promise<any> {
-    const userByEmail = await this.userService.findByEmail(loginDto.email);
-    if (!userByEmail) {
-      throw new UnauthorizedException();
-    }
-
-    //check password
-    const isMatchPassword = await bcrypt.compare(
-      loginDto.password,
-      userByEmail.password,
-    );
-    if (!isMatchPassword) {
+    if (!loginDto.email && !loginDto.phoneNumber) {
       throw new BadRequestException();
     }
 
-    const payload = {
-      userId: userByEmail.id,
-      email: userByEmail.email,
-    };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+    if (loginDto.email || loginDto.email != '') {
+      const userByEmail = await this.userService.findByEmail(loginDto.email);
+      if (!userByEmail) {
+        throw new UnauthorizedException('email');
+      }
+      //check password
+      const isMatchPassword = await bcrypt.compare(
+        loginDto.password,
+        userByEmail.password,
+      );
+      if (!isMatchPassword) {
+        throw new BadRequestException('Pass is false');
+      }
+
+      const payload = {
+        userId: userByEmail.id,
+        email: userByEmail.email,
+      };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    }
+
+    if (loginDto.phoneNumber || loginDto.phoneNumber != '') {
+      const userByPhoneNumber = await this.userService.findByPhoneNumber(
+        loginDto.phoneNumber,
+      );
+      if (!userByPhoneNumber) {
+        throw new UnauthorizedException('phone');
+      }
+      //check password
+      const isMatchPassword = await bcrypt.compare(
+        loginDto.password,
+        userByPhoneNumber.password,
+      );
+      if (!isMatchPassword) {
+        throw new BadRequestException('Pass is false');
+      }
+
+      const payload = {
+        userId: userByPhoneNumber.id,
+        email: userByPhoneNumber.email,
+      };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    }
   }
 
   //Register
@@ -125,7 +156,7 @@ export class AuthService {
 
     //send otp to email
     await this.mailerService.sendMail({
-      to: 'mamtoi123456789@gmail.com',
+      to: email,
       template: './sendEmailOtp',
       context: {
         code: otp,
@@ -133,16 +164,16 @@ export class AuthService {
     });
   }
 
-  async validateOtp(email: string, otp: string): Promise<any> {
+  async validateOtp(forgotPassDto: ForgotPassDto): Promise<any> {
     //clear otp
-
+    console.log('========' + forgotPassDto.email);
     await this.otpRepo.delete({ expiredAt: LessThan(new Date()) });
 
     const userByEmailOtp = await this.otpRepo.findOne({
-      where: { email: email },
+      where: { email: forgotPassDto.email },
     });
     console.log(userByEmailOtp);
-    if (userByEmailOtp && userByEmailOtp.otp == otp) {
+    if (userByEmailOtp && userByEmailOtp.otp == forgotPassDto.otp) {
       return 'Otp is valid';
     } else {
       throw new NotFoundException('Otp is invalid');
@@ -150,6 +181,7 @@ export class AuthService {
   }
 
   async resetPassword(email: string, password: string): Promise<any> {
+    console.log(password);
     const userByEmailOtp = await this.otpRepo.findOne({
       where: { email },
     });
@@ -157,12 +189,8 @@ export class AuthService {
     const userByEmail = await this.userService.findByEmail(email);
 
     if (userByEmailOtp) {
-      userByEmail.password = password;
       const salt = await bcrypt.genSalt(+process.env.APP_BCRYPT_SALT);
-      userByEmail.password = await bcrypt.hash(
-        userByEmail.password || userByEmail.password,
-        salt,
-      );
+      userByEmail.password = await bcrypt.hash(password, salt);
       return this.userRepo.save(userByEmail);
     }
   }

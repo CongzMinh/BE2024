@@ -24,7 +24,6 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'src/configs/multer.config';
 import { extname } from 'path';
 
-
 @Controller('post')
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -64,9 +63,7 @@ export class PostController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
-    const filepaths = file.map(
-      (file) => file.destination + '/' + file.filename,
-    );
+    const filepaths = file.map((file) => file.filename);
     return this.postService.createPost(createPostDto, filepaths, currentUser);
   }
 
@@ -112,9 +109,7 @@ export class PostController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
-    const filepaths = file.map(
-      (file) => file.destination + '/' + file.filename,
-    );
+    const filepaths = file.map((file) => file.filename);
     return this.postService.updateById(
       id,
       currentUser,
@@ -127,4 +122,5 @@ export class PostController {
   deletePost(@Param('id') id: number, @CurrentUser() currentUser: UserEntity) {
     return this.postService.delete(id, currentUser);
   }
+
 }

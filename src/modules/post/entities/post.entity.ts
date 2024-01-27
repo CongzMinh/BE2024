@@ -4,12 +4,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
-import { json } from 'stream/consumers';
+import { CommentEntity } from './comment.entity';
 
 @Entity({
   name: 'posts',
@@ -17,6 +20,9 @@ import { json } from 'stream/consumers';
 export class PostEntity {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'boolean' })
+  published: boolean;
 
   @Column()
   address: string;
@@ -81,4 +87,11 @@ export class PostEntity {
   @ManyToOne(() => UserEntity, (user) => user.posts)
   @Transform(({ obj }) => obj.user.id)
   user: UserEntity;
+
+  @ManyToMany(() => UserEntity, (user) => user.favoritePosts)
+  @JoinTable()
+  likedBy: UserEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.post)
+  comments: CommentEntity[];
 }

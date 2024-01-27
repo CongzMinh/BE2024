@@ -5,6 +5,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -12,6 +14,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/shared/enums/user.enum';
 import { PostEntity } from 'src/modules/post/entities/post.entity';
+import { FavoritePostEntity } from 'src/modules/post/entities/favorite-post.entity';
+import { CommentEntity } from 'src/modules/post/entities/comment.entity';
 
 @Entity({
   name: 'users',
@@ -78,6 +82,16 @@ export class UserEntity {
 
   @OneToMany(() => PostEntity, (post) => post.user)
   posts: PostEntity[];
+
+  @ManyToMany(() => PostEntity, (post) => post.likedBy, { cascade: true })
+  @JoinTable()
+  favoritePosts: PostEntity[];
+
+  @OneToMany(() => FavoritePostEntity, (favoritePost) => favoritePost.user)
+  favoritePostsConnection: FavoritePostEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comments: CommentEntity[];
 
   @BeforeInsert()
   async setPassword(password: string) {
