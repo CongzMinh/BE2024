@@ -83,7 +83,7 @@ export class UserEntity {
   @OneToMany(() => PostEntity, (post) => post.user)
   posts: PostEntity[];
 
-  @ManyToMany(() => PostEntity, (post) => post.likedBy, { cascade: true })
+  @ManyToMany(() => PostEntity, (post) => post.likedBy)
   @JoinTable()
   favoritePosts: PostEntity[];
 

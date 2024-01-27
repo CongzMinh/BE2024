@@ -9,10 +9,12 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import { CommentEntity } from './comment.entity';
+import { FavoritePostEntity } from './favorite-post.entity';
 
 @Entity({
   name: 'posts',
@@ -88,10 +90,10 @@ export class PostEntity {
   @Transform(({ obj }) => obj.user.id)
   user: UserEntity;
 
-  @ManyToMany(() => UserEntity, (user) => user.favoritePosts)
-  @JoinTable()
-  likedBy: UserEntity[];
+  @OneToMany(() => FavoritePostEntity, (favoritePost) => favoritePost.post)
+  likedBy: FavoritePostEntity[];
 
   @OneToMany(() => CommentEntity, (comment) => comment.post)
   comments: CommentEntity[];
+
 }

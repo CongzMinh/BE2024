@@ -21,7 +21,7 @@ export class PostService {
   ) {
     const post = this.postRepo.create(createPostDto);
     post.user = currentUser;
-    post.image = image;
+    post.image = image ? image : [];
     return this.postRepo.save(post);
   }
 

@@ -25,6 +25,7 @@ export class RoomService {
   async getAll(): Promise<PostEntity[]> {
     return this.postRepo.find({
       where: { published: true },
+      relations: ['likedBy.user'],
     });
   }
 
@@ -111,7 +112,9 @@ export class RoomService {
         where: { user: { id: roomId } },
         relations: ['post'],
       });
-      return favorites;
+      const likedPosts = favorites.map((favorite) => favorite.post);
+
+      return likedPosts;
     } catch (error) {
       throw new Error(`Error retrieving liked posts: ${error.message}`);
     }
@@ -140,20 +143,16 @@ export class RoomService {
     }
   }
 
-  async getLikesInfo(
-    roomId: number,
-  ): Promise<{ likesCount: number; likedUsers: UserEntity[] }> {
+  async getLikesInfo(roomId: number): Promise<UserEntity[]> {
     try {
       // Retrieve likes count and liked users for the specified post
       const likedPosts = await this.favoritePostRepo.find({
         where: { post: { id: roomId } },
         relations: ['user'], // Assuming there is a relationship between FavoritePostEntity and UserEntity
       });
-  
-      const likesCount = likedPosts.length;
       const likedUsers = likedPosts.map((favorite) => favorite.user);
   
-      return { likesCount, likedUsers };
+      return likedUsers;
     } catch (error) {
       console.error(`Error retrieving likes info: ${error.message}`);
       throw new Error(`Error retrieving likes info: ${error.message}`);

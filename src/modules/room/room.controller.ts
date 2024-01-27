@@ -56,9 +56,8 @@ export class RoomController {
   @Get(':roomId/likes-info')
   async getLikesInfo(
     @Param('roomId', ParseIntPipe) roomId: number,
-  ): Promise<{ likesCount: number; likedUsers: UserEntity[] }> {
+  ): Promise<UserEntity[]> {
     const likesInfo = await this.roomService.getLikesInfo(roomId);
-
     return likesInfo;
   }
 
