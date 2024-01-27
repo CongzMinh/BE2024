@@ -24,7 +24,7 @@ import { SearchRoomDto } from './dto/room-search.dto';
 export class RoomController {
   constructor(private roomService: RoomService) {}
   @Post('filter')
-  getAllWithFilter(@Query() request: RoomFilterDto) {
+  getAllWithFilter(@Body() request: RoomFilterDto) {
     return this.roomService.getAllWithFilter(request);
   }
 
@@ -56,9 +56,8 @@ export class RoomController {
   @Get(':roomId/likes-info')
   async getLikesInfo(
     @Param('roomId', ParseIntPipe) roomId: number,
-  ): Promise<{ likesCount: number; likedUsers: UserEntity[] }> {
+  ): Promise<UserEntity[]> {
     const likesInfo = await this.roomService.getLikesInfo(roomId);
-
     return likesInfo;
   }
 
