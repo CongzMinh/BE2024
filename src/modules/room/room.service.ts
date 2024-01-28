@@ -78,6 +78,7 @@ export class RoomService {
         price: Between(request.search_price_min, request.search_price_max),
         area: Between(request.search_area_min, request.search_area_max),
       },
+      relations: ['likedBy.user'],
       order: order,
     };
   
