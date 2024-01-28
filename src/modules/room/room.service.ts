@@ -5,13 +5,13 @@ import {
 } from '@nestjs/common';
 import { PostRepository } from '../post/repositories/post.repository';
 import { RoomFilterDto } from './dto/room-filter.dto';
-import { Any, Between, ILike } from 'typeorm';
 import { PostEntity } from '../post/entities/post.entity';
 import { UserRepository } from '../user/repositories/user.repository';
 import { FavoritePostRepository } from './repositories/favorite-post.reponsitory';
 import { CommentRepository } from './repositories/comment.repository';
 import { UserEntity } from '../user/entities/user.entity';
 import { SearchRoomDto } from './dto/room-search.dto';
+import { Between, ILike } from 'typeorm';
 
 @Injectable()
 export class RoomService {
@@ -48,13 +48,13 @@ export class RoomService {
 
     switch (request.sortBy) {
       case 'newest':
-        order = { createdAt: 'DESC' };
+        order = { createdAt: 'DESC', id: 'ASC' };
         break;
       case 'LowToHigh':
-        order = { price: 'ASC', createdAt: 'DESC' };
+        order = { price: 'ASC', createdAt: 'DESC', id: 'ASC' };
         break;
       case 'HighToLow':
-        order = { price: 'DESC', createdAt: 'DESC' };
+        order = { price: 'DESC', createdAt: 'DESC', id: 'ASC' };
         break;
       default:
         order = { createdAt: 'ASC' };
@@ -80,6 +80,9 @@ export class RoomService {
 
     return this.postRepo.find({
       where: { address: ILike(`%${address}%`) },
+      order: {
+        id: 'ASC',
+      },
     });
   }
 
