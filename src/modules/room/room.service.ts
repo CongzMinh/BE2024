@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PostRepository } from '../post/repositories/post.repository';
 import { RoomFilterDto } from './dto/room-filter.dto';
+import { Any, Between, ILike, In } from 'typeorm';
 import { PostEntity } from '../post/entities/post.entity';
 import { UserRepository } from '../user/repositories/user.repository';
 import { FavoritePostRepository } from './repositories/favorite-post.reponsitory';
@@ -60,16 +61,35 @@ export class RoomService {
         order = { createdAt: 'ASC' };
     }
 
-    const rooms = await this.postRepo.find({
+    // const rooms = await this.postRepo.find({
+    //   where: {
+    //     price: Between(request.search_price_min, request.search_price_max),
+    //     area: Between(request.search_area_min, request.search_area_max),
+    //     published: true,
+    //   },
+    //   order: order,
+    // });
+
+    // return rooms;
+
+
+    const query: Record<string, any> = {
       where: {
         price: Between(request.search_price_min, request.search_price_max),
         area: Between(request.search_area_min, request.search_area_max),
-        published: true,
       },
       order: order,
-    });
-
+    };
+  
+    // Check if utilities array is provided in the request
+    if (request.utilities && request.utilities.length > 0) {
+      query.where.utilities = In(request.utilities);
+    }
+  
+    const rooms = await this.postRepo.find(query);
+  
     return rooms;
+
   }
 
   async searchRoomsByAddress(
