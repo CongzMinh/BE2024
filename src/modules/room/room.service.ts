@@ -26,6 +26,9 @@ export class RoomService {
     return this.postRepo.find({
       where: { published: true },
       relations: ['likedBy.user'],
+      order: {
+        id: 'ASC',
+      },
     });
   }
 
