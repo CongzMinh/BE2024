@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
   Res,
+  Put,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { RoomFilterDto } from './dto/room-filter.dto';
