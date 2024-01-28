@@ -66,6 +66,7 @@ export class RoomService {
         area: Between(request.search_area_min, request.search_area_max),
         published: true,
       },
+      relations: ['likedBy.user'],
       order: order,
     });
 
